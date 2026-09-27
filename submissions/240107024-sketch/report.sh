@@ -8,16 +8,18 @@ echo "FILES: $(find "$dir" -type f | wc -l)"
 echo "DIRS: $(find "$dir" -mindepth 1 -type d | wc -l)"
 
 echo "LARGEST:"
-find "$dir" -type f -printf '%s %P\n' | sort -nr | head -3
+find "$dir" -type f -printf '%s %P\n' |
+    sort -k1,1nr -k2,2 |
+    awk 'NR <= 3'
 
 echo "EXECUTABLE:"
-find "$dir" -type f -perm -u=x -printf '%P\n' | sort
+find "$dir" -type f -perm -u=x -printf '%P\n' |
+    sort
 
 echo "EXTENSIONS:"
 find "$dir" -type f -printf '%f\n' |
-    awk '/\./ {sub(/^.*\./, "."); print}' |
+    awk '/^.+\.[^.]+$/ {sub(/^.*\./, "."); print}' |
     sort |
     uniq -c |
-    sort -k1,1nr |
-    head -5 |
-    awk '{print $1, $2}'
+    sort -k1,1nr -k2,2 |
+    awk 'NR <= 5 {print $1, $2}'
